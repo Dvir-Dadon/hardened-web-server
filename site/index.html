@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dvir Dadon · Security Lab</title>
+<meta name="description" content="Dvir Dadon - junior SOC / IT candidate. Two hands-on projects: a Home SOC Lab with Wazuh SIEM and a hardened public Nginx server with live attack data.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <a class="brand" href="#main">Dvir Dadon</a>
+    <nav aria-label="Sections">
+      <a href="#projects">Projects</a>
+      <a href="#live">Live data</a>
+      <a href="#verify">Verify</a>
+      <a href="#defenses">Defenses</a>
+      <a href="#incidents">Incidents</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Security lab &amp; portfolio</p>
+    <h1>Dvir Dadon</h1>
+    <p class="role">Junior SOC Analyst · NOC · IT Support</p>
+    <p class="lead">Cyber Defense Implementer graduate (Kernelios, 535 hours) with CCNA and LPI Linux Essentials.
+      I build systems, harden them, watch what attacks them and write up what I find.
+      Below are my two hands-on projects, including a public server you can check yourself.</p>
+    <div class="actions">
+      <a class="btn primary" href="#contact">Contact me</a>
+      <a class="btn" href="https://github.com/Dvir-Dadon" rel="noopener noreferrer">GitHub</a>
+      <a class="btn" href="https://www.linkedin.com/in/dvir-dadon/" rel="noopener noreferrer">LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<section id="projects" class="band">
+  <div class="wrap">
+    <h2>Projects</h2>
+    <div class="cards">
+      <article class="card">
+        <p class="tag">Project 1 · Blue team lab</p>
+        <h3>Home SOC Lab</h3>
+        <p>An isolated Active Directory lab (Windows Server domain controller + domain-joined Windows 11 client)
+          monitored by a Wazuh SIEM. I generated controlled security events, triaged them as a Tier 1 analyst,
+          mapped them to MITRE ATT&amp;CK and wrote an incident report. Includes a small Python script that
+          summarizes failed logins.</p>
+        <p class="stack">Windows Server · Active Directory · Wazuh · MITRE ATT&amp;CK · Python</p>
+        <a class="link" href="https://github.com/Dvir-Dadon/home-soc-lab" rel="noopener noreferrer">Repository and incident report →</a>
+      </article>
+      <article class="card">
+        <p class="tag">Project 2 · Internet-facing server</p>
+        <h3>Hardened Web Server</h3>
+        <p>A public Ubuntu 24.04 VPS running Nginx with several virtual hosts, including this page.
+          I hardened it from the firewall to the kernel, raised its Lynis score from 60 to 78, and built a
+          pipeline that turns the server's own logs into the live attack data below.</p>
+        <p class="stack">Ubuntu 24.04 · Nginx · ufw · Fail2ban · TLS / HSTS / CSP · auditd · Lynis · Python · Bash</p>
+        <a class="link" href="__REPO_URL__" rel="noopener noreferrer">Repository, configs and write-ups →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="live">
+  <div class="wrap">
+    <h2>Live attack attempts on this server</h2>
+    <p class="muted">Last 24 hours, all sites on the server. Only attack attempts are counted, never normal visitors.
+      Updated every 20 minutes. <span id="updated" class="pill">Loading…</span></p>
+
+    <div id="live-error" class="notice" hidden>Live data is temporarily unavailable. The rest of the page is static and still accurate.</div>
+
+    <div class="kpis kpis-3">
+      <div class="kpi"><span class="kpi-value" data-k="last24.ssh_attempts">-</span><span class="kpi-label">failed SSH login attempts</span></div>
+      <div class="kpi"><span class="kpi-value" data-k="last24.web_attacks">-</span><span class="kpi-label">malicious web requests</span></div>
+      <div class="kpi"><span class="kpi-value" data-k="last24.bans">-</span><span class="kpi-label">blocked by Fail2ban</span></div>
+    </div>
+
+    <figure class="panel">
+      <div class="chart-head">
+        <figcaption id="hourly-title">Failed SSH login attempts per hour</figcaption>
+        <div class="toggle" role="group" aria-label="Chart measure">
+          <button type="button" data-series="ssh_attempts" aria-pressed="true">SSH logins</button>
+          <button type="button" data-series="web_attacks" aria-pressed="false">Web requests</button>
+        </div>
+      </div>
+      <div class="chart" id="chart-hourly" role="img" aria-label="Bar chart per hour, last 24 hours"></div>
+      <details><summary>Show as table</summary><div id="table-hourly"></div></details>
+    </figure>
+
+    <div class="grid3">
+      <div class="panel">
+        <h3>Usernames bots tried</h3>
+        <ol class="toplist" id="top-users"></ol>
+      </div>
+      <div class="panel">
+        <h3>Paths scanners looked for</h3>
+        <ol class="toplist mono" id="top-paths"></ol>
+      </div>
+      <div class="panel">
+        <h3>Types of web attacks</h3>
+        <ol class="toplist" id="top-types"></ol>
+      </div>
+    </div>
+
+    <figure class="panel daily">
+      <figcaption>Attack attempts per day since tracking started</figcaption>
+      <div class="chart" id="chart-daily" role="img" aria-label="Bar chart of failed SSH logins per day"></div>
+      <details><summary>Show as table</summary><div id="table-daily"></div></details>
+    </figure>
+
+    <p class="fine">How it is counted: a failed SSH attempt is a log event of an unknown user, a rejected authentication or a failed
+      key/password, the same rule my audit script uses. Successful logins and my own traffic are excluded. No IP address is
+      published or stored, not even in part. A username or path is listed only when at least 3 different sources sent it,
+      and log text is shown as plain text only, never as HTML.</p>
+  </div>
+</section>
+
+<section id="verify" class="band">
+  <div class="wrap">
+    <h2>Verify it yourself</h2>
+    <p class="muted">Independent scanners test this exact host. A fresh scan can take a minute.</p>
+    <div class="verify">
+      <a class="vbtn" href="https://securityheaders.com/?q=dvir-lab.duckdns.org&amp;followRedirects=on" rel="noopener noreferrer">
+        <strong>Security Headers</strong><span>HTTP response headers</span></a>
+      <a class="vbtn" href="https://www.ssllabs.com/ssltest/analyze.html?d=dvir-lab.duckdns.org&amp;hideResults=on" rel="noopener noreferrer">
+        <strong>SSL Labs</strong><span>TLS configuration</span></a>
+      <a class="vbtn" href="https://developer.mozilla.org/en-US/observatory/analyze?host=dvir-lab.duckdns.org" rel="noopener noreferrer">
+        <strong>Mozilla Observatory</strong><span>Overall web security</span></a>
+    </div>
+    <h3>Checks I run from outside (Kali VM)</h3>
+    <ul class="checks two-col">
+      <li>HTTP redirects to HTTPS (301)</li>
+      <li>6 of 6 security headers present</li>
+      <li>Server version hidden</li>
+      <li><code>/.git</code> and <code>/.env</code> return 404</li>
+      <li>Directory listing refused (403)</li>
+      <li>Request by bare IP: connection dropped</li>
+      <li><code>TRACE</code> refused (405)</li>
+      <li>SSH with a password: refused</li>
+    </ul>
+    <p class="fine">Active scanning (port scans, Nikto) is on hold until my hosting provider approves it in writing, as its acceptable-use policy requires.</p>
+  </div>
+</section>
+
+<section id="defenses">
+  <div class="wrap">
+    <h2>What is in place</h2>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Network &amp; access</h3>
+        <ul class="checks">
+          <li>Host firewall (<code>ufw</code>): only 22, 80 and 443 are open</li>
+          <li>SSH keys only, direct root login disabled, admin through a non-root sudo user</li>
+          <li>SSH: <code>MaxAuthTries 3</code>, no X11, agent or TCP forwarding, verbose logging, legal banner</li>
+          <li>Fail2ban jails for SSH and for web scanners (<code>nginx-botsearch</code>)</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Web layer</h3>
+        <ul class="checks">
+          <li>TLS 1.2 / 1.3 only, Let's Encrypt per site with automatic renewal, HSTS</li>
+          <li>Strict Content-Security-Policy (no inline code) and security headers, set once for every site</li>
+          <li>Catch-all server: unknown names and bare-IP requests get no answer and no certificate</li>
+          <li>Hidden, backup and secret files blocked; server version hidden</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Operating system</h3>
+        <ul class="checks">
+          <li>Kernel and network hardening with <code>sysctl</code></li>
+          <li>Unused kernel modules blocked (dccp, sctp, rds, tipc, usb-storage)</li>
+          <li>Core dumps disabled, compilers restricted to root</li>
+          <li><code>auditd</code>, <code>sysstat</code> and process accounting running</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Operations</h3>
+        <ul class="checks">
+          <li>Automatic security updates, with a reboot at 02:00 UTC when a kernel update needs one</li>
+          <li>My <code>security-check.sh</code>: logins, failures, bans, scans, backdoor checks, updates</li>
+          <li>Live attack counts regenerated every 20 minutes, no IP addresses published or stored</li>
+          <li>Weekly manual review of this dashboard and the audit script output</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="arch" aria-label="Architecture">
+      <span class="node">Internet</span><span class="arrow" aria-hidden="true">→</span>
+      <span class="node">ufw<small>22 · 80 · 443</small></span><span class="arrow" aria-hidden="true">→</span>
+      <span class="node">Nginx<small>lab page · family site · catch-all</small></span><span class="arrow" aria-hidden="true">→</span>
+      <span class="node">Logs<small>journal · access.log · fail2ban.log</small></span><span class="arrow" aria-hidden="true">→</span>
+      <span class="node">Fail2ban · lab-stats<small>bans · counts every 20 min</small></span><span class="arrow" aria-hidden="true">→</span>
+      <span class="node">This page</span>
+    </div>
+    <p class="fine">The same server also hosts a small static family recipe site, which is intentionally not linked here.</p>
+  </div>
+</section>
+
+<section id="lynis" class="band">
+  <div class="wrap">
+    <h2>Lynis audit: before and after</h2>
+    <div class="grid2">
+      <div class="panel">
+        <p class="muted">Lynis hardening index (0-100)</p>
+        <div class="score"><span class="score-label">Before</span><span class="meter"><span class="fill f60"></span></span><span class="score-num">60</span></div>
+        <div class="score"><span class="score-label">After</span><span class="meter"><span class="fill f78"></span></span><span class="score-num">78</span></div>
+        <p class="fine">78 is not 100 on purpose. A score is a checklist, not a goal: each remaining item was weighed against this server's real risk.</p>
+      </div>
+      <div class="panel">
+        <h3>Left as is, and why</h3>
+        <dl class="why">
+          <dt>Separate partitions</dt><dd>Single-disk VPS. Repartitioning a live system is risky for little gain here.</dd>
+          <dt>GRUB password</dt><dd>The boot console is only reachable through the hosting panel, so the panel account is what needs protecting.</dd>
+          <dt>Password policy</dt><dd>No account can log in with a password at all.</dd>
+          <dt>Moving SSH off port 22</dt><dd>Hiding, not protection, and it would remove the attack data shown on this page.</dd>
+          <dt>Malware scanner</dt><dd>Static sites with no uploads or server-side code. auditd and my check script watch for changes.</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="incidents">
+  <div class="wrap">
+    <h2>Incidents I investigated</h2>
+    <div class="cards">
+      <article class="card incident">
+        <p class="tag">Incident 1 · False positive</p>
+        <h3>"Successful SSH logins" every hour</h3>
+        <dl>
+          <dt>Alert</dt><dd>My log check reported a successful SSH login roughly every hour, which would mean the server was compromised.</dd>
+          <dt>Investigation</dt><dd>I read the matching raw log lines. They were not logins: the search for <code>Accepted</code> was also matching
+            <code>…not in PubkeyAcceptedAlgorithms</code>, which sshd logs when it rejects a bot that offers an old <code>ssh-rsa</code> key.</dd>
+          <dt>Fix</dt><dd>I anchored the detection rule to the real login message (<code>Accepted publickey|password for …</code>) and re-checked: no unknown logins.</dd>
+          <dt>Lesson</dt><dd>Validate a detection rule against the raw events before trusting it. A loose rule creates alert fatigue, or hides a real alert.</dd>
+        </dl>
+      </article>
+      <article class="card incident">
+        <p class="tag">Incident 2 · Suspected timestomping</p>
+        <h3>A file dated in the future</h3>
+        <dl>
+          <dt>Alert</dt><dd>A file on the server showed a modification time in the future, a classic sign of timestomping (MITRE ATT&amp;CK T1070.006).</dd>
+          <dt>Investigation</dt><dd>I compared the timestamps with <code>stat</code>. The modification time (mtime) can be set by any program. The birth time and the change time (ctime) are set by the kernel: both were from September 2026, when I added the image. Only the mtime pointed to 2027.</dd>
+          <dt>Root cause</dt><dd><code>wget</code> copies the server's <code>Last-Modified</code> header into the file's mtime by default. Benign.</dd>
+          <dt>Lesson</dt><dd>Know which timestamps an attacker can forge and which they can't, and find a benign explanation before you escalate.</dd>
+        </dl>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="screens" class="band">
+  <div class="wrap">
+    <h2>Evidence</h2>
+    <p class="muted">Scanner grades and screenshots from the server. Personal details and every IP address are redacted. Click a picture to enlarge it.</p>
+    <div class="gallery">
+      <figure class="shot"><a href="img/01-securityheaders.png"><img src="img/01-securityheaders.png" alt="Security Headers grade for dvir-lab.duckdns.org"></a><figcaption>Security Headers grade</figcaption></figure>
+      <figure class="shot"><a href="img/02-ssllabs.png"><img src="img/02-ssllabs.png" alt="SSL Labs grade"></a><figcaption>SSL Labs TLS grade</figcaption></figure>
+      <figure class="shot"><a href="img/03-observatory.png"><img src="img/03-observatory.png" alt="Mozilla Observatory score"></a><figcaption>Mozilla Observatory score</figcaption></figure>
+      <figure class="shot"><a href="img/04-ufw.png"><img src="img/04-ufw.png" alt="ufw status showing only ports 22, 80 and 443 allowed"></a><figcaption>Firewall: only 22, 80, 443</figcaption></figure>
+      <figure class="shot"><a href="img/08-fail2ban.png"><img src="img/08-fail2ban.png" alt="Fail2ban jail status"></a><figcaption>Fail2ban jails at work</figcaption></figure>
+      <figure class="shot"><a href="img/09-incident1.png"><img src="img/09-incident1.png" alt="Loose versus anchored log search"></a><figcaption>Incident 1: loose vs. anchored rule</figcaption></figure>
+      <figure class="shot"><a href="img/10-incident2.png"><img src="img/10-incident2.png" alt="stat output comparing mtime and ctime"></a><figcaption>Incident 2: mtime vs. ctime</figcaption></figure>
+      <figure class="shot"><a href="img/12-lynis.png"><img src="img/12-lynis.png" alt="Lynis hardening index before and after"></a><figcaption>Lynis: 60 → 78</figcaption></figure>
+    </div>
+    <p id="no-shots" class="muted" hidden>Screenshots are being added.</p>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <h2>Contact</h2>
+    <p>I'm looking for a Junior SOC, NOC or IT / Helpdesk role in Israel. Happy to walk you through either project live.</p>
+    <ul class="contact">
+      <li><span>LinkedIn</span><a href="https://www.linkedin.com/in/dvir-dadon/" rel="noopener noreferrer">linkedin.com/in/dvir-dadon</a></li>
+      <li><span>GitHub</span><a href="https://github.com/Dvir-Dadon" rel="noopener noreferrer">github.com/Dvir-Dadon</a></li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">Static HTML and plain JavaScript. No cookies, no trackers, no third-party requests.</div>
+</footer>
+</body>
+</html>

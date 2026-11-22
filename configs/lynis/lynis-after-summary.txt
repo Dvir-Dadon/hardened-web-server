@@ -1,0 +1,3 @@
+  Suggestions (25):
+  Hardening index : 78 [###############     ]
+  Tests performed : 267

@@ -1,0 +1,15 @@
+[DEFAULT]
+bantime = 1h
+findtime = 10m
+maxretry = 5
+bantime.increment = true
+bantime.maxtime = 1w
+
+[sshd]
+enabled = true
+
+[nginx-botsearch]
+enabled = true
+backend = auto
+logpath = /var/log/nginx/access.log
+          /var/log/nginx/error.log

@@ -1,0 +1,13 @@
+logingracetime 120
+maxauthtries 3
+permitrootlogin no
+pubkeyauthentication yes
+passwordauthentication no
+kbdinteractiveauthentication no
+x11forwarding no
+permitemptypasswords no
+allowtcpforwarding no
+allowagentforwarding no
+banner /etc/issue.net
+loglevel VERBOSE
+authenticationmethods any

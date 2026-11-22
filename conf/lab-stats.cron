@@ -1,0 +1,5 @@
+# /etc/cron.d/lab-stats - public summary of attack events for the lab dashboard
+# Every 20 minutes, at :07 :27 :47 (off the busy :00). Errors go to the journal: journalctl -t lab-stats
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+7,27,47 * * * * root nice -n 10 /usr/local/sbin/lab-stats 2>&1 | logger -t lab-stats

@@ -1,0 +1,9 @@
+# never commit
+*.pem
+*.key
+id_*
+.env
+ready/
+*.tar.gz
+site/data/stats.json
+local.env
